@@ -7,7 +7,6 @@ package main
 //o banco de dados será criado na pasta
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 
@@ -22,7 +21,7 @@ func main() {
 	fmt.Println("COnectou ao banco")
 	defer db.Close()
 
-	_, err = db.Exec(`CREATE TABLE people (id INTEGER, name VARCHAR)`)
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS people (id INTEGER, name VARCHAR)`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,18 +30,40 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_, err = db.Exec(`INSERT INTO people VALUES (001, 'MULTIPLErOWS')`)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println("Inseriu os dados")
 	var (
 		id   int
 		name string
 	)
-	row := db.QueryRow(`SELECT id, name FROM people`)
-	err = row.Scan(&id, &name)
-	if errors.Is(err, sql.ErrNoRows) {
-		log.Println("no rows")
-	} else if err != nil {
+	//iterarmultiplas linhas
+	// Example query over a table
+	rows, err := db.Query("SELECT id, name FROM people")
+	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
+
+	// Iterate over each row
+	for rows.Next() {
+		var id int
+		var name string
+
+		if err := rows.Scan(&id, &name); err != nil {
+			log.Fatal(err)
+		}
+
+		// Perform your row operation here
+		fmt.Printf("Processed Row - ID: %d, Name: %s\n", id, name +" edited")
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
 	db.Exec("COMMIT")
 	fmt.Printf("id: %d, name: %s\n", id, name)
 }
