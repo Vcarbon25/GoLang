@@ -1,4 +1,5 @@
 //whem calling the code in cmd with go run Name, the user can put more arguments after 
+//go run ReceiveArguments.go Arg1 Arg2 Arg3
 //the name and the code will use those
 //spaces ' ' separeted values
 package main
